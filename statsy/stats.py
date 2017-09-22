@@ -47,10 +47,13 @@ class Stats(object):
     def _annotate_with_time(object_list):
         time_extract_sqlite = "strftime('%%Y:%%m:%%d:%%H:%%M', created_at)"
         time_extract_mysql = "DATE_FORMAT(created_at, '%%Y:%%m:%%d:%%H:%%i')"
+        time_extract_postgresql = "to_date(cast(created_at as TEXT),'YYYY:MM:DD:HH24:MI')"
 
         time_extract = time_extract_mysql
         if settings.DATABASES['default']['ENGINE'] == 'django.db.backends.sqlite3':
             time_extract = time_extract_sqlite
+        elif 'postgresql' in settings.DATABASES['default']['ENGINE']:
+            time_extract = time_extract_postgresql
 
         return object_list.extra({"time": time_extract}).values(
             'time', 'float_value', 'text_value'
